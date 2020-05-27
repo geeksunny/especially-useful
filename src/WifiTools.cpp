@@ -2,6 +2,30 @@
 #include "WifiTools.h"
 #include "DebugLog.hpp"
 
+/* Default macro values */
+#ifndef AP_NAME
+#define AP_NAME "Esp8266_AP"
+#endif
+#ifndef AP_MAC_IN_NAME
+#define AP_MAC_IN_NAME false
+#endif
+#ifndef AP_ENCRYPTED
+#define AAP_ENCRYPTED true
+#endif
+#ifndef AP_PASSWORD
+#define AAP_PASSWORD "Esp8266_PASSWORD"
+#endif
+#ifndef CLIENT_SSID
+#define CLIENT_SSID "NetworkName"
+#endif
+#ifndef CLIENT_ENCRYPTED
+#define CLIENT_ENCRYPTED true
+#endif
+#ifndef CLIENT_PASS
+#define CLIENT_PASS "NetworkPassword"
+#endif
+/* End of Default macro values */
+
 #if AP_MAC_IN_NAME
 #include <sstream>
 #include <iomanip>
