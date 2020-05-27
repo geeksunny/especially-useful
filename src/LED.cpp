@@ -46,7 +46,7 @@ LED &LED::setup() {
 }
 
 void LED::set(const bool turnedOn, const unsigned long duration, const unsigned long delay) {
-  std::cout << "LED::set( " << turnedOn << " , " << duration << " , " << delay << " )" << std::endl;
+  DEBUG("LED::set( ", turnedOn, " , ", duration, " , ", delay, " )")
   if (duration == 0 && delay == 0) {
     digitalWrite(pin_, (turnedOn ? HIGH : LOW));
     return;
