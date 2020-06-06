@@ -5,6 +5,7 @@
 #include <cstddef>
 
 #define ESP_NOW_SEND(dest_mac_addr, data) esp_now_tools::send(dest_mac_addr, (uint8_t *) &data, sizeof(data));
+#define ESP_NOW_GET_DATA(dest, src) memcpy(&dest, src, sizeof(dest));
 
 namespace esp_now_tools {
 
