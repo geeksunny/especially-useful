@@ -23,6 +23,7 @@ Explanations & Examples to be provided at a later date.
 
 * DebugLog.hpp
 * EnumTools.hpp
+* EspNowTools.h
 * LED.h
 * PgmStringTools.hpp
 * prog_str.h
