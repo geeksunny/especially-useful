@@ -33,6 +33,11 @@
 
 namespace wifi_tools {
 
+bool disableWifiConnection() {
+  // TODO: Anything else here need to be considered?
+  return WiFi.setAutoConnect(false);
+}
+
 String apName() {
 #if AP_MAC_IN_NAME
   uint8_t mac[WL_MAC_ADDR_LENGTH];

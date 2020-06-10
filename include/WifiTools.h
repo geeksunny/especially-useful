@@ -3,6 +3,7 @@
 
 namespace wifi_tools {
 
+bool disableWifiConnection();
 String apName();
 bool startAP();
 bool startClient();
