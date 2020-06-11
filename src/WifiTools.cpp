@@ -73,7 +73,7 @@ bool startAP() {
   return started;
 }
 
-bool startClient() {
+bool startClient(on_wait_cb_t on_wait_cb, unsigned long on_wait_freq_ms) {
   // Check for presence of wifi shield / module
   if (WiFi.status() == WL_NO_SHIELD) {
     DEBUG("WiFi shield not present")
@@ -104,11 +104,15 @@ bool startClient() {
   }
 
   while (WiFi.status() != WL_CONNECTED) {
-    // wait 0.5 seconds for connection:
-    delay(500);
+    if (on_wait_cb) {
+      on_wait_cb();
+    } else {
 #ifdef IS_DEBUG_MODE
-    std::cout << ".";
+      std::cout << ".";
 #endif
+    }
+    // wait on_wait_freq_ms for connection:
+    delay(on_wait_freq_ms);
     // TODO: Handle a wifi timeout period, return false on timeout
   }
 
