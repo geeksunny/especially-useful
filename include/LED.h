@@ -20,11 +20,10 @@ class LED {
   unsigned long timeOn_, timeOff_;
   led::LEDAction action_ = LEDAction::NONE;
  public:
-  LED(uint8_t pinNumber);
+  explicit LED(uint8_t pinNumber);
   virtual ~LED();
   static void loop();
   LED &setup();
-  void set(bool turnedOn, unsigned long duration = 0, unsigned long delay = 0);
   void on(unsigned long durationOn = 0, unsigned long delay = 0);
   void off(unsigned long durationOff = 0, unsigned long delay = 0);
   void toggle(unsigned long duration = 0, unsigned long delay = 0);
@@ -35,8 +34,12 @@ class LED {
   bool isOn();
  private:
   void blink(bool startTurnedOn, unsigned long durationOn, unsigned long durationOff, unsigned long delay);
+  void set(bool turnedOn, unsigned long duration = 0, unsigned long delay = 0);
   void handleDelay();
   void handleAction();
+  void turnOn();
+  void turnOff();
+  void setTurnedOn(bool turnedOn);
 };
 
 }

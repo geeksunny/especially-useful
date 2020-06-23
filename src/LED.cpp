@@ -45,26 +45,6 @@ LED &LED::setup() {
   return *this;
 }
 
-void LED::set(const bool turnedOn, const unsigned long duration, const unsigned long delay) {
-  DEBUG("LED::set( ", turnedOn, " , ", duration, " , ", delay, " )")
-  if (duration == 0 && delay == 0) {
-    digitalWrite(pin_, (turnedOn ? HIGH : LOW));
-    return;
-  } else if (delay > 0) {
-    delay_ = true;
-    nextTick_ = millis() + delay;
-    if (turnedOn) {
-      timeOn_ = duration;
-    } else {
-      timeOff_ = duration;
-    }
-  } else {
-    delay_ = false;
-    nextTick_ = millis() + duration;
-  }
-  action_ = turnedOn ? LEDAction::ON : LEDAction::OFF;
-}
-
 void LED::on(const unsigned long durationOn, const unsigned long delay) {
   set(true, durationOn, delay);
 }
@@ -90,11 +70,7 @@ void LED::blink(const bool startTurnedOn,
                 const unsigned long durationOff,
                 const unsigned long delay) {
   if (delay == 0) {
-    if (startTurnedOn) {
-      on();
-    } else {
-      off();
-    }
+    setTurnedOn(startTurnedOn);
   }
   if (durationOn > 0) {
     timeOn_ = durationOn;
@@ -107,6 +83,27 @@ void LED::blink(const bool startTurnedOn,
     }
     action_ = LEDAction::BLINK;
   }
+}
+
+void LED::set(const bool turnedOn, const unsigned long duration, const unsigned long delay) {
+  DEBUG("LED::set( ", turnedOn, " , ", duration, " , ", delay, " )")
+  if (duration == 0 && delay == 0) {
+    action_ = LEDAction::NONE;
+    digitalWrite(pin_, (turnedOn ? HIGH : LOW));
+    return;
+  } else if (delay > 0) {
+    delay_ = true;
+    nextTick_ = millis() + delay;
+    if (turnedOn) {
+      timeOn_ = duration;
+    } else {
+      timeOff_ = duration;
+    }
+  } else {
+    delay_ = false;
+    nextTick_ = millis() + duration;
+  }
+  action_ = turnedOn ? LEDAction::ON : LEDAction::OFF;
 }
 
 void LED::stop() {
@@ -125,14 +122,14 @@ void LED::handleDelay() {
   delay_ = false;
   switch (action_) {
     case LEDAction::ON: {
-      on();
+      turnOn();
       if (timeOn_ > 0) {
         nextTick_ = millis() + timeOn_;
       }
       break;
     }
     case LEDAction::OFF: {
-      off();
+      turnOff();
       if (timeOff_ > 0) {
         nextTick_ = millis() + timeOff_;
       }
@@ -140,7 +137,7 @@ void LED::handleDelay() {
     }
     case LEDAction::BLINK: {
       bool setTo = !isOn();
-      set(setTo);
+      setTurnedOn(setTo);
       nextTick_ = millis() + ((setTo) ? timeOn_ : timeOff_);
       break;
     }
@@ -153,25 +150,40 @@ void LED::handleDelay() {
 void LED::handleAction() {
   switch (action_) {
     case LEDAction::ON: {
-      off();
+      turnOn();
       stop();
       break;
     }
     case LEDAction::OFF: {
-      on();
+      turnOff();
       stop();
       break;
     }
     case LEDAction::BLINK: {
       bool litUp = isOn();
       nextTick_ = millis() + (litUp ? timeOff_ : timeOn_);
-      set(!litUp);
+      setTurnedOn(!litUp);
       break;
     }
     case LEDAction::NONE: {
       // Shouldn't be here
     }
   }
+}
+
+void LED::turnOn() {
+  DEBUG("LED::turnOn");
+  digitalWrite(pin_, HIGH);
+}
+
+void LED::turnOff() {
+  DEBUG("LED::turnOff");
+  digitalWrite(pin_, LOW);
+}
+
+void LED::setTurnedOn(bool turnedOn) {
+  DEBUG("LED::setTurnedOn", (turnedOn ? "TRUE" : "FALSE"));
+  digitalWrite(pin_, (turnedOn ? HIGH : LOW));
 }
 
 }

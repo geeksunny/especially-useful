@@ -22,7 +22,7 @@
 #define BLINK_DURATION_STANDARD   500
 #define BLINK_DURATION_LONG       1000
 
-#define DEMO_SHIFT_DURATION       3000
+#define DEMO_SHIFT_DURATION       5000
 
 enum led_demo_mode {
   BLINK_QUICK,
