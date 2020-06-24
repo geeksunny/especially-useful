@@ -107,6 +107,7 @@ void LED::set(const bool turnedOn, const unsigned long duration, const unsigned 
   } else {
     delay_ = false;
     nextTick_ = millis() + duration;
+    setTurnedOn(turnedOn);
   }
   settings_->action = turnedOn ? LEDAction::ON : LEDAction::OFF;
 }
