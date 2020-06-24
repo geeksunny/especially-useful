@@ -150,12 +150,12 @@ void LED::handleDelay() {
 void LED::handleAction() {
   switch (action_) {
     case LEDAction::ON: {
-      turnOn();
+      turnOff();
       stop();
       break;
     }
     case LEDAction::OFF: {
-      turnOff();
+      turnOn();
       stop();
       break;
     }
