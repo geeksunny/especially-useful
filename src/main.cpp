@@ -76,9 +76,9 @@ void set_led_demo_mode(enum led_demo_mode &mode) {
       ledSecondary->blinkInverted(BLINK_DURATION_LONG);
       break;
     case ON_OFF:
-      DEBUG("::ON_OFF::")
-      ledPrimary->on();
-      ledSecondary->off();
+      DEBUG("::LONG-ON_OFF::restoreAfter")
+      ledPrimary->on(BLINK_DURATION_LONG, 0, true);
+      ledSecondary->off(BLINK_DURATION_LONG, 0, true);
       break;
     case OFF_ON:
       DEBUG("::OFF_ON::")

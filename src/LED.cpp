@@ -26,8 +26,7 @@ void LED::loop() {
   }
   unsigned long now = millis();
   for (auto &led : leds) {
-    // TODO: Should there be a flag check to ensure ::setup() was called?
-    if (led->action_ == LEDAction::NONE) {
+    if (led->settings_->action == LEDAction::NONE) {
       continue;
     }
     if (now >= led->nextTick_) {
@@ -45,16 +44,16 @@ LED &LED::setup() {
   return *this;
 }
 
-void LED::on(const unsigned long durationOn, const unsigned long delay) {
-  set(true, durationOn, delay);
+void LED::on(const unsigned long durationOn, const unsigned long delay, const bool restoreAfter) {
+  set(true, durationOn, delay, restoreAfter);
 }
 
-void LED::off(const unsigned long durationOff, const unsigned long delay) {
-  set(false, durationOff, delay);
+void LED::off(const unsigned long durationOff, const unsigned long delay, const bool restoreAfter) {
+  set(false, durationOff, delay, restoreAfter);
 }
 
-void LED::toggle(const unsigned long duration, const unsigned long delay) {
-  set((digitalRead(pin_) == LOW), duration, delay);
+void LED::toggle(const unsigned long duration, const unsigned long delay, const bool restoreAfter) {
+  set((digitalRead(pin_) == LOW), duration, delay, restoreAfter);
 }
 
 void LED::blink(const unsigned long durationOn, const unsigned long durationOff, const unsigned long delay) {
@@ -73,45 +72,55 @@ void LED::blink(const bool startTurnedOn,
     setTurnedOn(startTurnedOn);
   }
   if (durationOn > 0) {
-    timeOn_ = durationOn;
-    timeOff_ = (durationOff == 0) ? durationOn : durationOff;
+    settings_->timeOn = durationOn;
+    settings_->timeOff = (durationOff == 0) ? durationOn : durationOff;
     if (delay > 0) {
       delay_ = true;
       nextTick_ = millis() + delay;
     } else {
-      nextTick_ = millis() + (startTurnedOn ? timeOn_ : timeOff_);
+      nextTick_ = millis() + (startTurnedOn ? settings_->timeOn : settings_->timeOff);
     }
-    action_ = LEDAction::BLINK;
+    settings_->action = LEDAction::BLINK;
   }
 }
 
-void LED::set(const bool turnedOn, const unsigned long duration, const unsigned long delay) {
-  DEBUG("LED::set( ", turnedOn, " , ", duration, " , ", delay, " )")
+void LED::set(const bool turnedOn, const unsigned long duration, const unsigned long delay, const bool restoreAfter) {
+  DEBUG("LED::set( ", turnedOn, " , ", duration, " , ", delay, " , ", restoreAfter, " )")
+  // If immediate and continual, write to the pin and set action to NONE.
   if (duration == 0 && delay == 0) {
-    action_ = LEDAction::NONE;
+    settings_->action = LEDAction::NONE;
     digitalWrite(pin_, (turnedOn ? HIGH : LOW));
     return;
-  } else if (delay > 0) {
+  }
+  // Change to alternate settings object if restoreAfter flag is set to `true.`
+  if (restoreAfter) {
+    settings_ = &settings_temp_;
+  }
+  if (delay > 0) {
     delay_ = true;
     nextTick_ = millis() + delay;
     if (turnedOn) {
-      timeOn_ = duration;
+      settings_->timeOn = duration;
     } else {
-      timeOff_ = duration;
+      settings_->timeOff = duration;
     }
   } else {
     delay_ = false;
     nextTick_ = millis() + duration;
   }
-  action_ = turnedOn ? LEDAction::ON : LEDAction::OFF;
+  settings_->action = turnedOn ? LEDAction::ON : LEDAction::OFF;
 }
 
-void LED::stop() {
-  action_ = LEDAction::NONE;
+void LED::stop(const bool cancelStoredAction) {
+  if (!restoreIfNeeded(!cancelStoredAction) || cancelStoredAction) {
+    // Set current action to NONE if a restore is not needed
+    //  OR if cancelStoredAction is `true.`
+    settings_->action = LEDAction::NONE;
+  }
 }
 
 bool LED::isRunning() {
-  return action_ != LEDAction::NONE;
+  return settings_->action != LEDAction::NONE;
 }
 
 bool LED::isOn() {
@@ -120,25 +129,29 @@ bool LED::isOn() {
 
 void LED::handleDelay() {
   delay_ = false;
-  switch (action_) {
+  switch (settings_->action) {
     case LEDAction::ON: {
       turnOn();
-      if (timeOn_ > 0) {
-        nextTick_ = millis() + timeOn_;
+      if (settings_->timeOn > 0) {
+        nextTick_ = millis() + settings_->timeOn;
+      } else {
+        stop();
       }
       break;
     }
     case LEDAction::OFF: {
       turnOff();
-      if (timeOff_ > 0) {
-        nextTick_ = millis() + timeOff_;
+      if (settings_->timeOff > 0) {
+        nextTick_ = millis() + settings_->timeOff;
+      } else {
+        stop();
       }
       break;
     }
     case LEDAction::BLINK: {
       bool setTo = !isOn();
       setTurnedOn(setTo);
-      nextTick_ = millis() + ((setTo) ? timeOn_ : timeOff_);
+      nextTick_ = millis() + ((setTo) ? settings_->timeOn : settings_->timeOff);
       break;
     }
     case LEDAction::NONE: {
@@ -148,7 +161,7 @@ void LED::handleDelay() {
 }
 
 void LED::handleAction() {
-  switch (action_) {
+  switch (settings_->action) {
     case LEDAction::ON: {
       turnOff();
       stop();
@@ -161,7 +174,7 @@ void LED::handleAction() {
     }
     case LEDAction::BLINK: {
       bool litUp = isOn();
-      nextTick_ = millis() + (litUp ? timeOff_ : timeOn_);
+      nextTick_ = millis() + (litUp ? settings_->timeOff : settings_->timeOn);
       setTurnedOn(!litUp);
       break;
     }
@@ -184,6 +197,29 @@ void LED::turnOff() {
 void LED::setTurnedOn(bool turnedOn) {
   DEBUG("LED::setTurnedOn", (turnedOn ? "TRUE" : "FALSE"));
   digitalWrite(pin_, (turnedOn ? HIGH : LOW));
+}
+
+bool LED::restoreIfNeeded(const bool restoreNextTick) {
+  if (settings_ == &settings_temp_) {
+    settings_ = &settings_main_;
+    if (restoreNextTick) {
+      switch (settings_->action) {
+        case LEDAction::ON:
+          nextTick_ = millis() + settings_->timeOn;
+          break;
+        case LEDAction::OFF:
+          nextTick_ = millis() + settings_->timeOff;
+          break;
+        case LEDAction::BLINK:
+          nextTick_ = millis() + (isOn() ? settings_->timeOff : settings_->timeOn);
+          break;
+        case LEDAction::NONE:break;
+          // No action needed
+      }
+    }
+    return true;
+  }
+  return false;
 }
 
 }
