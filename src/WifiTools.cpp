@@ -38,6 +38,32 @@ bool disableWifiConnection() {
   return WiFi.setAutoConnect(false);
 }
 
+bool setMacAddrClient(uint8_t *new_mac_addr) {
+//  return WiFi.mode(WIFI_STA) && wifi_set_macaddr(STATION_IF, new_mac_addr);
+  if (!WiFi.mode(WIFI_STA)) {
+    DEBUG("Error setting Wifi mode to STATION")
+    return false;
+  }
+  if (!wifi_set_macaddr(STATION_IF, new_mac_addr)) {
+    DEBUG("Error setting Wifi STATION MAC Address.")
+    return false;
+  }
+  return true;
+}
+
+bool setMacAddrAP(uint8_t *new_mac_addr) {
+//  return WiFi.mode(WIFI_AP) && wifi_set_macaddr(SOFTAP_IF, new_mac_addr);
+  if (!WiFi.mode(WIFI_AP)) {
+    DEBUG("Error setting Wifi mode to AP")
+    return false;
+  }
+  if (!wifi_set_macaddr(SOFTAP_IF, new_mac_addr)) {
+    DEBUG("Error setting Wifi AP MAC Address.")
+    return false;
+  }
+  return true;
+}
+
 String apName() {
 #if AP_MAC_IN_NAME
   uint8_t mac[WL_MAC_ADDR_LENGTH];
