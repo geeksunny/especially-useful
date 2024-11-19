@@ -10,10 +10,10 @@
 #define AP_MAC_IN_NAME false
 #endif
 #ifndef AP_ENCRYPTED
-#define AAP_ENCRYPTED true
+#define AP_ENCRYPTED true
 #endif
 #ifndef AP_PASSWORD
-#define AAP_PASSWORD "Esp8266_PASSWORD"
+#define AP_PASSWORD "Esp8266_PASSWORD"
 #endif
 #ifndef CLIENT_SSID
 #define CLIENT_SSID "NetworkName"
