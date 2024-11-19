@@ -89,8 +89,8 @@ bool startAP() {
 
 #ifdef IS_DEBUG_MODE
   if (started) {
-    std::cout << "Started AP with name: " << name << " | Encrypted: " << (AP_ENCRYPTED ? "YES" : "NO") << std::endl;
-    std::cout << "Server IP: " << WiFi.softAPIP().toString() << std::endl;
+    std::cout << "Started AP with name: " << name.c_str() << " | Encrypted: " << (AP_ENCRYPTED ? "YES" : "NO") << std::endl;
+    std::cout << "Server IP: " << WiFi.softAPIP().toString().c_str() << std::endl;
   } else {
     std::cout << "FAILED to start wifi AP!";
   }
