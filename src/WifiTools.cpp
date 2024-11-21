@@ -112,11 +112,11 @@ bool startClient(on_wait_cb_t on_wait_cb, unsigned long on_wait_freq_ms) {
 
   // Attempt to connect to network
   // TODO: Figure out how to check if there is any stored WIFI credentials with .getAutoConnect() check!!
-  if (WiFi.getAutoConnect()) {
+  if (WiFi.getPersistent()) {
     DEBUG("Attempting to connect using SAVED SSID!")
-    // Connect to saved network:
-//    WiFi
-//    .begin();
+    if (!WiFi.getAutoConnect()) {
+      WiFi.begin();
+    }
   } else {
 #if CLIENT_ENCRYPTED
     DEBUG("Attempting to connect to WPA SSID:", CLIENT_SSID)
