@@ -3,30 +3,31 @@
 #include "DebugLog.hpp"
 
 /* Default macro values */
-#ifndef AP_NAME
-#define AP_NAME "Esp8266_AP"
+#ifndef WIFI_AP_NAME
+#define WIFI_AP_NAME "Esp8266_AP"
 #endif
-#ifndef AP_MAC_IN_NAME
-#define AP_MAC_IN_NAME false
+#ifndef WIFI_AP_MAC_IN_NAME
+#define WIFI_AP_MAC_IN_NAME false
 #endif
-#ifndef AP_ENCRYPTED
-#define AP_ENCRYPTED true
+#ifndef WIFI_AP_ENCRYPTED
+#define WIFI_AP_ENCRYPTED true
 #endif
-#ifndef AP_PASSWORD
-#define AP_PASSWORD "Esp8266_PASSWORD"
+#ifndef WIFI_AP_PASSWORD
+#define WIFI_AP_PASSWORD "Esp8266_PASSWORD"
 #endif
-#ifndef CLIENT_SSID
-#define CLIENT_SSID "NetworkName"
+#ifndef WIFI_CLIENT_SSID
+#define WIFI_CLIENT_SSID "NetworkName"
 #endif
-#ifndef CLIENT_ENCRYPTED
-#define CLIENT_ENCRYPTED true
+#ifndef WIFI_CLIENT_ENCRYPTED
+#define WIFI_CLIENT_ENCRYPTED true
 #endif
-#ifndef CLIENT_PASS
-#define CLIENT_PASS "NetworkPassword"
+#ifndef WIFI_CLIENT_PASS
+#define WIFI_CLIENT_PASS "NetworkPassword"
 #endif
 /* End of Default macro values */
 
-#if AP_MAC_IN_NAME
+
+#if WIFI_AP_MAC_IN_NAME
 #include <sstream>
 #include <iomanip>
 #endif
@@ -52,7 +53,7 @@ bool setMacAddrClient(uint8_t *new_mac_addr) {
 }
 
 bool setMacAddrAP(uint8_t *new_mac_addr) {
-//  return WiFi.mode(WIFI_AP) && wifi_set_macaddr(SOFTAP_IF, new_mac_addr);
+//  return WiFi.mode(WIFI_AP) && wifi_set_macaddr(SOFTWIFI_AP_IF, new_mac_addr);
   if (!WiFi.mode(WIFI_AP)) {
     DEBUG("Error setting Wifi mode to AP")
     return false;
@@ -65,15 +66,15 @@ bool setMacAddrAP(uint8_t *new_mac_addr) {
 }
 
 String apName() {
-#if AP_MAC_IN_NAME
+#if WIFI_AP_MAC_IN_NAME
   uint8_t mac[WL_MAC_ADDR_LENGTH];
   WiFi.macAddress(mac);
-  std::ostringstream os(AP_NAME);
+  std::ostringstream os(WIFI_AP_NAME);
   os << "_" << std::hex << std::setfill('0') << std::setw(2)
      << mac[0] << mac[1] << mac[2] << mac[3] << mac[4] << mac[5];
   return String{os.str().c_str()};
 #else
-  return AP_NAME;
+  return WIFI_AP_NAME;
 #endif
 }
 
@@ -81,15 +82,15 @@ bool startAP() {
   String name = apName();
 
   WiFi.mode(WIFI_AP);
-#if AP_ENCRYPTED
-  bool started = WiFi.softAP(name, AP_PASSWORD);
+#if WIFI_AP_ENCRYPTED
+  bool started = WiFi.softAP(name, WIFI_AP_PASSWORD);
 #else
   bool started = WiFi.softAP(name);
 #endif
 
 #ifdef IS_DEBUG_MODE
   if (started) {
-    std::cout << "Started AP with name: " << name.c_str() << " | Encrypted: " << (AP_ENCRYPTED ? "YES" : "NO") << std::endl;
+    std::cout << "Started AP with name: " << name.c_str() << " | Encrypted: " << (WIFI_AP_ENCRYPTED ? "YES" : "NO") << std::endl;
     std::cout << "Server IP: " << WiFi.softAPIP().toString().c_str() << std::endl;
   } else {
     std::cout << "FAILED to start wifi AP!";
@@ -118,14 +119,14 @@ bool startClient(on_wait_cb_t on_wait_cb, unsigned long on_wait_freq_ms) {
       WiFi.begin();
     }
   } else {
-#if CLIENT_ENCRYPTED
-    DEBUG("Attempting to connect to WPA SSID:", CLIENT_SSID)
+#if WIFI_CLIENT_ENCRYPTED
+    DEBUG("Attempting to connect to WPA SSID:", WIFI_CLIENT_SSID)
     // Connect to WPA/WPA2 network:
-    WiFi.begin(CLIENT_SSID, CLIENT_PASS);
+    WiFi.begin(WIFI_CLIENT_SSID, WIFI_CLIENT_PASS);
 #else
-    DEBUG("Attempting to connect to OPEN WIFI SSID:", CLIENT_SSID)
+    DEBUG("Attempting to connect to OPEN WIFI SSID:", WIFI_CLIENT_SSID)
     // Connect to unencrypted wifi network:
-    WiFi.begin(CLIENT_SSID);
+    WiFi.begin(WIFI_CLIENT_SSID);
 #endif
   }
 

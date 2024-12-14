@@ -1,14 +1,16 @@
 {
   "IS_DEBUG_MODE": "",
-  "CLIENT": {
-    "SSID": "NetworkName",
-    "ENCRYPTED": true,
-    "PASS": "NetworkPassword"
-  },
-  "AP": {
-    "NAME": "Esp8266_AP",
-    "MAC_IN_NAME": false,
-    "ENCRYPTED": true,
-    "PASSWORD": "Esp8266_PASSWORD"
+  "WIFI": {
+    "CLIENT": {
+      "SSID": "NetworkName",
+      "ENCRYPTED": true,
+      "PASS": "NetworkPassword"
+    },
+    "AP": {
+      "NAME": "Esp8266_AP",
+      "MAC_IN_NAME": false,
+      "ENCRYPTED": true,
+      "PASSWORD": "Esp8266_PASSWORD"
+    }
   }
 }

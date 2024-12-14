@@ -19,7 +19,7 @@ def parseConfig(d, prefix=''):
     for key in d:
         t = type(d[key])
         if t in (dict, OrderedDict):
-            result.extend(parseConfig(d[key], key))
+            result.extend(parseConfig(d[key], prefix + key))
             continue
         elif t in (str, STR_TYPE):
             if d[key] == "":
