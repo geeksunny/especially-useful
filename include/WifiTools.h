@@ -10,6 +10,11 @@ bool setMacAddrClient(uint8_t *new_mac_addr);
 bool setMacAddrAP(uint8_t *new_mac_addr);
 String apName();
 bool startAP();
+bool startClient(const char *network_name,
+                 const char *network_password,
+                 on_wait_cb_t on_wait_cb = nullptr,
+                 unsigned long on_wait_freq_ms = 500);
+bool startClient(const char *network_name, on_wait_cb_t on_wait_cb = nullptr, unsigned long on_wait_freq_ms = 500);
 bool startClient(on_wait_cb_t on_wait_cb = nullptr, unsigned long on_wait_freq_ms = 500);
 
 }

@@ -100,7 +100,10 @@ bool startAP() {
   return started;
 }
 
-bool startClient(on_wait_cb_t on_wait_cb, unsigned long on_wait_freq_ms) {
+bool startClient(const char *network_name,
+                 const char *network_password,
+                 on_wait_cb_t on_wait_cb,
+                 unsigned long on_wait_freq_ms) {
   // Check for presence of wifi shield / module
   if (WiFi.status() == WL_NO_SHIELD) {
     DEBUG("WiFi shield not present")
@@ -119,15 +122,19 @@ bool startClient(on_wait_cb_t on_wait_cb, unsigned long on_wait_freq_ms) {
       WiFi.begin();
     }
   } else {
+    if (network_name == nullptr) {
+      network_name = WIFI_CLIENT_SSID;
 #if WIFI_CLIENT_ENCRYPTED
-    DEBUG("Attempting to connect to WPA SSID:", WIFI_CLIENT_SSID)
-    // Connect to WPA/WPA2 network:
-    WiFi.begin(WIFI_CLIENT_SSID, WIFI_CLIENT_PASS);
-#else
-    DEBUG("Attempting to connect to OPEN WIFI SSID:", WIFI_CLIENT_SSID)
-    // Connect to unencrypted wifi network:
-    WiFi.begin(WIFI_CLIENT_SSID);
+      network_password = WIFI_CLIENT_PASS;
 #endif
+    }
+#if WIFI_CLIENT_ENCRYPTED
+    DEBUG("Attempting to connect to WPA SSID:", network_name)
+#else
+    DEBUG("Attempting to connect to OPEN WIFI SSID:", network_name)
+#endif
+    // Connect to wifi network:
+    WiFi.begin(network_name, network_password);
   }
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -146,6 +153,14 @@ bool startClient(on_wait_cb_t on_wait_cb, unsigned long on_wait_freq_ms) {
   // Connected to network!
   DEBUG("Connected to network!")
   return true;
+}
+
+bool startClient(const char *network_name, on_wait_cb_t on_wait_cb, unsigned long on_wait_freq_ms) {
+  return startClient(network_name, nullptr, on_wait_cb, on_wait_freq_ms);
+}
+
+bool startClient(on_wait_cb_t on_wait_cb, unsigned long on_wait_freq_ms) {
+  return startClient(nullptr, nullptr, on_wait_cb, on_wait_freq_ms);
 }
 
 }
